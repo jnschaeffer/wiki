@@ -5,10 +5,12 @@
 	http-client
 	spiffy
 	srfi-1
-	srfi-13
 	srfi-28
+	unicode-char-sets
 	uri-common
-	utf8)
+	utf8
+	utf8-srfi-13
+	utf8-srfi-14)
 
 ;; gets a random element from a list, by making it into a vector (of course).
 (define (random-element lst)
@@ -51,7 +53,7 @@
 ;; whitespace characters and folding it into lists of sentence lists. the output is a reversed list
 ;; of reversed sentences, but that's fine because we only use this to get a random sentence later.
 (define (make-sentences p)
-  (let* ((words (string-tokenize p))
+  (let* ((words (string-tokenize p (char-set-complement char-set:white-space)))
 	 (end-ir (irregex "(([^\\.]|^)\\.|\\?|!)(\\[[a-zA-Z0-9\\? ]+\\])*$"))
 	 (citation-ir (irregex "\\[[a-zA-Z0-9\\?]+\\]"))
 	 (builder
@@ -74,17 +76,24 @@
 (define (sentence->string sentence)
   (string-join (reverse sentence) " "))
 
+(define (random-sentence-from-paragraphs cur-sentence paragraphs)
+  (if (> (string-length cur-sentence) 0)
+      cur-sentence
+      (let* ((paragraph (random-element paragraphs))
+	    (sentences (make-sentences paragraph))
+	    (sentence (if (not (null? sentences))
+			  (random-element sentences)
+			  '()))
+	    (sentence-str (sentence->string sentence)))
+	(random-sentence-from-paragraphs sentence-str paragraphs))))
+
 ;; the fun function. splits HTML input from a port into paragraphs, then gets a random sentence,
 ;; then returns that as a string. some paragraphs are currently empty, so this may return an empty
 ;; string.
 (define (random-sentence-from-html port)
   (let* ((paragraphs (make-paragraphs port))
-	 (paragraph (random-element paragraphs))
-	 (sentences (make-sentences paragraph))
-	 (sentence (if (not (null? sentences))
-		       (random-element sentences)
-		       '())))
-    (sentence->string sentence)))
+	 (sentence-str (random-sentence-from-paragraphs "" paragraphs)))
+    sentence-str))
 
 ;; gets a random sentence from a random article on wikipedia. if add-newline? is #t, also adds a
 ;; newline character to the result.
