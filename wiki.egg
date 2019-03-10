@@ -1,0 +1,13 @@
+((components (extension wiki))
+ (license "BSD")
+ (version "0.1")
+ (dependencies
+  html-parser
+  http-client
+  openssl
+  spiffy
+  uri-common
+  utf8)
+ (category uncategorized)
+ (author "John Schaeffer")
+ (synopsis "new wikipedia"))
