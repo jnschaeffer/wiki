@@ -122,7 +122,7 @@
   ;; runs the random wiki server.
   (define (run-server port)
     (tcp-buffer-size 2048)
-    (vhost-map `(("localhost" . ,handle-request)))
+    (vhost-map `((".*" . ,handle-request)))
     (access-log (current-output-port))
     (format #t "running server on port ~a~n" port)
     (start-server port: port)))

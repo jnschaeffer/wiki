@@ -6,6 +6,6 @@ ADD . /app
 
 RUN cd /app && chicken-install
 
-EXPOSE 80
+ENV PORT 8080
 
-CMD csi -e '(import wiki) (run-server 80)'
+CMD csi -e '(import (chicken process-context) wiki) (run-server (string->number (get-environment-variable "PORT")))'
